@@ -24,26 +24,32 @@
 
 boolean debug =0;
 
-#define numOutputs 8
+#define numOutputs 1
 
 byte incomingByte;
 byte note;
 byte velocity;
 
-byte switchPin[8]={10,11,12,13,A0,A1,A2,A3};
+//byte switchPin[8]={10,11,12,13,A0,A1,A2,A3};
+//
+//boolean switchState[8];
+//boolean lastSwitchState[8];   // the previous reading from the input pin
+//
+//long lastDebounceTime[9];  // the last time the output pin was toggled
 
+byte switchPin[1]={8};
+boolean switchState[1];
+boolean lastSwitchState[1];   // the previous reading from the input pin
 
-boolean switchState[8];
-boolean lastSwitchState[8];   // the previous reading from the input pin
+long lastDebounceTime[2];  // the last time the output pin was toggled
 
-long lastDebounceTime[9];  // the last time the output pin was toggled
 long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 int chan = 1;
 int action=2; //0 =note off ; 1=note on ; 2= nada
 int numOuts = numOutputs; //how many outputs
 #define firstPin 2 //what's the first pin
-int lowNote = 36; //what's the first note?
+int lowNote = 60; //what's the first note?
 
 long noteStart[numOutputs+firstPin];
 int timeout = 500;
@@ -54,10 +60,10 @@ boolean noteOn[numOutputs+firstPin];
 //setup: declaring iputs and outputs and begin serial
 void setup() {
   
-   for(int i=0; i<5; i++){
-     pinMode(switchPin[i], INPUT);
-   }
-  
+//   for(int i=0; i<5; i++){
+//     pinMode(switchPin[i], INPUT);
+//   }
+
   //pinMode(statusLed,OUTPUT);   // declare the LED's pin as output
   pinMode(0,INPUT);   // rx pin input
   //  /*
@@ -83,13 +89,17 @@ void loop () {
   if (Serial.available() > 0) {
     // read the incoming byte:
     incomingByte = Serial.read();
-
+    
     switch (incomingByte) {
+
+ /*
       case 144: //chan+143:  // note on
         action = 1;
+        digitalWrite(8, HIGH);
         break;
       case 128: //chan+127:  // note off
         action = 0;
+        digitalWrite(8, LOW);
         break;
       case 208: //chan+207:  // aftertouch
         //TODO: something
@@ -122,6 +132,7 @@ void loop () {
     for(int i=firstPin; i<numOutputs+firstPin; i++) { 
       notesTimeout(i);
     }
+    */
 
   }
 }
@@ -133,11 +144,14 @@ void playNote(byte note, byte velocity){
   int value=LOW;
   value = (velocity > 10) ? HIGH : LOW;
 
+  //Test value
+  note = 60;
+  
   //since we don't want to "play" all notes we wait for a note in range
   if (note>=lowNote && note<lowNote+numOuts){
-    int myPin=note-(lowNote-firstPin); // to get a pinnumber within note range
+    //int myPin=note-(lowNote-firstPin); // to get a pinnumber within note range
+    int myPin = 8;
     digitalWrite(myPin, value);
-   
     //check to see if the drawer is open
     if (value==HIGH && switchState[myPin-2]) {
       noteStart[myPin] = millis();
